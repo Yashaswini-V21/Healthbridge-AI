@@ -1,0 +1,164 @@
+{
+  "specialties": [
+    {
+      "id": "spec_001",
+      "name": "Cardiology",
+      "kannada": "ಹೃದಯ ರೋಗ ವಿಜ್ಞಾನ",
+      "description": "Medical specialty dealing with heart and cardiovascular system disorders",
+      "common_conditions": ["Heart Attack", "Angina", "Heart Failure", "Arrhythmia", "Hypertension", "Coronary Artery Disease"],
+      "symptoms": ["Chest Pain", "Palpitations", "Shortness of Breath", "Swelling in Legs", "Irregular Heartbeat"]
+    },
+    {
+      "id": "spec_002",
+      "name": "Neurology",
+      "kannada": "ನರ ವಿಜ್ಞಾನ",
+      "description": "Medical specialty dealing with brain, spinal cord, and nervous system disorders",
+      "common_conditions": ["Stroke", "Epilepsy", "Parkinson's Disease", "Alzheimer's", "Multiple Sclerosis", "Migraine"],
+      "symptoms": ["Headache", "Weakness", "Numbness", "Seizures", "Memory Loss", "Dizziness"]
+    },
+    {
+      "id": "spec_003",
+      "name": "Orthopedics",
+      "kannada": "ಮೂಳೆ ರೋಗ ವಿಜ್ಞಾನ",
+      "description": "Medical specialty dealing with musculoskeletal system including bones, joints, and muscles",
+      "common_conditions": ["Fractures", "Arthritis", "Sports Injuries", "Joint Replacement", "Spine Disorders", "Torn Ligaments"],
+      "symptoms": ["Joint Pain", "Back Pain", "Muscle Pain", "Broken Bone", "Limited Mobility", "Swelling"]
+    },
+    {
+      "id": "spec_004",
+      "name": "Emergency Medicine",
+      "kannada": "ತುರ್ತು ವೈದ್ಯಕೀಯ",
+      "description": "Medical specialty for acute care of patients with urgent medical conditions",
+      "common_conditions": ["Trauma", "Heart Attack", "Stroke", "Severe Bleeding", "Poisoning", "Acute Infections"],
+      "symptoms": ["Severe Pain", "Unconsciousness", "Severe Bleeding", "Difficulty Breathing", "Chest Pain", "Head Injury"]
+    },
+    {
+      "id": "spec_005",
+      "name": "Pulmonology",
+      "kannada": "ಶ್ವಾಸಕೋಶ ವಿಜ್ಞಾನ",
+      "description": "Medical specialty dealing with respiratory system and lung diseases",
+      "common_conditions": ["Asthma", "COPD", "Pneumonia", "Tuberculosis", "Lung Cancer", "Bronchitis"],
+      "symptoms": ["Difficulty Breathing", "Cough", "Wheezing", "Chest Congestion", "Coughing Blood"]
+    },
+    {
+      "id": "spec_006",
+      "name": "Gastroenterology",
+      "kannada": "ಜಠರ ಕರುಳಿನ ವಿಜ್ಞಾನ",
+      "description": "Medical specialty dealing with digestive system and gastrointestinal disorders",
+      "common_conditions": ["GERD", "IBS", "Crohn's Disease", "Ulcerative Colitis", "Liver Disease", "Pancreatitis"],
+      "symptoms": ["Stomach Pain", "Nausea", "Vomiting", "Diarrhea", "Constipation", "Acid Reflux"]
+    },
+    {
+      "id": "spec_007",
+      "name": "Oncology",
+      "kannada": "ಕ್ಯಾನ್ಸರ್ ವಿಜ್ಞಾನ",
+      "description": "Medical specialty dealing with cancer diagnosis, treatment, and prevention",
+      "common_conditions": ["Breast Cancer", "Lung Cancer", "Colorectal Cancer", "Leukemia", "Lymphoma", "Prostate Cancer"],
+      "symptoms": ["Unexplained Weight Loss", "Persistent Pain", "Unusual Bleeding", "Lumps", "Fatigue", "Night Sweats"]
+    },
+    {
+      "id": "spec_008",
+      "name": "Pediatrics",
+      "kannada": "ಮಕ್ಕಳ ವೈದ್ಯಕೀಯ",
+      "description": "Medical specialty dealing with health and medical care of infants, children, and adolescents",
+      "common_conditions": ["Childhood Infections", "Asthma", "Allergies", "Growth Disorders", "Vaccination", "Developmental Issues"],
+      "symptoms": ["Fever in Child", "Persistent Crying", "Rash", "Difficulty Breathing", "Vomiting", "Dehydration"]
+    },
+    {
+      "id": "spec_009",
+      "name": "Obstetrics",
+      "kannada": "ಪ್ರಸೂತಿ ವಿಜ್ಞಾನ",
+      "description": "Medical specialty dealing with pregnancy, childbirth, and postpartum care",
+      "common_conditions": ["Pregnancy", "Labor", "Delivery", "Prenatal Care", "Gestational Diabetes", "Preeclampsia"],
+      "symptoms": ["Pregnancy Complications", "Vaginal Bleeding", "Severe Pain", "Decreased Fetal Movement", "Contractions"]
+    },
+    {
+      "id": "spec_010",
+      "name": "Gynecology",
+      "kannada": "ಸ್ತ್ರೀ ರೋಗ ವಿಜ್ಞಾನ",
+      "description": "Medical specialty dealing with female reproductive system and women's health",
+      "common_conditions": ["Menstrual Disorders", "PCOS", "Endometriosis", "Fibroids", "Ovarian Cysts", "Menopause"],
+      "symptoms": ["Abnormal Bleeding", "Severe Menstrual Pain", "Pelvic Pain", "Irregular Periods", "Vaginal Discharge"]
+    },
+    {
+      "id": "spec_011",
+      "name": "Nephrology",
+      "kannada": "ಮೂತ್ರಪಿಂಡ ವಿಜ್ಞಾನ",
+      "description": "Medical specialty dealing with kidney diseases and disorders",
+      "common_conditions": ["Chronic Kidney Disease", "Kidney Stones", "Urinary Tract Infections", "Kidney Failure", "Glomerulonephritis"],
+      "symptoms": ["Urination Problems", "Blood in Urine", "Swelling in Legs", "Back Pain", "Fatigue"]
+    },
+    {
+      "id": "spec_012",
+      "name": "Urology",
+      "kannada": "ಮೂತ್ರ ವಿಜ್ಞಾನ",
+      "description": "Medical specialty dealing with urinary tract and male reproductive system disorders",
+      "common_conditions": ["Kidney Stones", "Prostate Problems", "Urinary Incontinence", "Bladder Cancer", "Erectile Dysfunction"],
+      "symptoms": ["Urination Problems", "Painful Urination", "Blood in Urine", "Pelvic Pain", "Frequent Urination"]
+    },
+    {
+      "id": "spec_013",
+      "name": "ENT (Otolaryngology)",
+      "kannada": "ಕಿವಿ ಮೂಗು ಗಂಟಲು",
+      "description": "Medical specialty dealing with ear, nose, throat, and head and neck disorders",
+      "common_conditions": ["Ear Infections", "Sinusitis", "Tonsillitis", "Hearing Loss", "Sleep Apnea", "Nasal Polyps"],
+      "symptoms": ["Ear Pain", "Throat Pain", "Hearing Loss", "Sinus Congestion", "Difficulty Swallowing"]
+    },
+    {
+      "id": "spec_014",
+      "name": "Ophthalmology",
+      "kannada": "ನೇತ್ರ ವಿಜ್ಞಾನ",
+      "description": "Medical specialty dealing with eye and vision disorders",
+      "common_conditions": ["Cataracts", "Glaucoma", "Macular Degeneration", "Diabetic Retinopathy", "Eye Infections", "Refractive Errors"],
+      "symptoms": ["Vision Changes", "Eye Pain", "Blurred Vision", "Eye Redness", "Light Sensitivity"]
+    },
+    {
+      "id": "spec_015",
+      "name": "Dermatology",
+      "kannada": "ಚರ್ಮ ರೋಗ ವಿಜ್ಞಾನ",
+      "description": "Medical specialty dealing with skin, hair, and nail disorders",
+      "common_conditions": ["Acne", "Eczema", "Psoriasis", "Skin Cancer", "Fungal Infections", "Hair Loss"],
+      "symptoms": ["Rash", "Skin Changes", "Itching", "Skin Lesions", "Hair Loss", "Nail Problems"]
+    },
+    {
+      "id": "spec_016",
+      "name": "Endocrinology",
+      "kannada": "ಅಂತಃಸ್ರಾವಶಾಸ್ತ್ರ",
+      "description": "Medical specialty dealing with hormonal and metabolic disorders",
+      "common_conditions": ["Diabetes", "Thyroid Disorders", "Obesity", "Osteoporosis", "PCOS", "Growth Disorders"],
+      "symptoms": ["Weight Changes", "Fatigue", "Excessive Thirst", "Frequent Urination", "Hormonal Imbalances"]
+    },
+    {
+      "id": "spec_017",
+      "name": "Psychiatry",
+      "kannada": "ಮನೋವೈದ್ಯಕೀಯ",
+      "description": "Medical specialty dealing with mental health disorders",
+      "common_conditions": ["Depression", "Anxiety Disorders", "Bipolar Disorder", "Schizophrenia", "PTSD", "OCD"],
+      "symptoms": ["Anxiety", "Depression", "Mood Changes", "Sleep Problems", "Behavioral Changes"]
+    },
+    {
+      "id": "spec_018",
+      "name": "Rheumatology",
+      "kannada": "ಸಂಧಿವಾತ ವಿಜ್ಞಾನ",
+      "description": "Medical specialty dealing with autoimmune and inflammatory diseases of joints and connective tissue",
+      "common_conditions": ["Rheumatoid Arthritis", "Lupus", "Gout", "Fibromyalgia", "Scleroderma", "Vasculitis"],
+      "symptoms": ["Joint Pain", "Joint Swelling", "Stiffness", "Muscle Pain", "Fatigue"]
+    },
+    {
+      "id": "spec_019",
+      "name": "General Surgery",
+      "kannada": "ಸಾಮಾನ್ಯ ಶಸ್ತ್ರಚಿಕಿತ್ಸೆ",
+      "description": "Surgical specialty dealing with abdominal contents and related areas",
+      "common_conditions": ["Appendicitis", "Hernias", "Gallbladder Disease", "Bowel Obstruction", "Breast Surgery", "Trauma Surgery"],
+      "symptoms": ["Abdominal Pain", "Lumps", "Hernias", "Severe Bleeding", "Trauma Injuries"]
+    },
+    {
+      "id": "spec_020",
+      "name": "General Medicine",
+      "kannada": "ಸಾಮಾನ್ಯ ವೈದ್ಯಕೀಯ",
+      "description": "Primary care medical specialty dealing with general health and common illnesses",
+      "common_conditions": ["Common Cold", "Flu", "Hypertension", "Diabetes", "Infections", "General Health Checkups"],
+      "symptoms": ["Fever", "Fatigue", "Cough", "General Weakness", "Body Aches", "Common Illnesses"]
+    }
+  ]
+}

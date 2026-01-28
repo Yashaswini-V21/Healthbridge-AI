@@ -1,0 +1,914 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager, verify_jwt_in_request, get_jwt_identity
+from datetime import timedelta, datetime
+import os
+import logging
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Import models and routes
+from models.user_model import db, bcrypt, User, SearchHistory
+from models.symptom_analyzer import get_symptom_analyzer
+from models.hospital_matcher import get_hospital_matcher
+from routes.auth_routes import auth_bp
+from routes.symptom_routes import symptom_bp
+from routes.hospital_routes import hospital_bp
+from routes.appointment_routes import appointment_bp
+from routes.chat_routes import chat_bp
+
+# Initialize Flask app
+app = Flask(__name__)
+
+# ============================================
+# CONFIGURATION
+# ============================================
+
+app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production'))
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=7)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///mediconnect.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Security headers
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+# ============================================
+# INITIALIZE EXTENSIONS
+# ============================================
+
+db.init_app(app)
+bcrypt.init_app(app)
+jwt = JWTManager(app)
+
+# Initialize analyzers
+symptom_analyzer = get_symptom_analyzer()
+hospital_matcher = get_hospital_matcher()
+
+# ============================================
+# CORS CONFIGURATION
+# ============================================
+
+# Allow all Vercel domains and localhost
+allowed_origins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://*.vercel.app",  # Allow all Vercel deployments
+    "https://mediconnect-ai-nu.vercel.app"  # Your current deployment
+]
+
+# Get additional origins from environment variable
+env_origins = os.getenv('ALLOWED_ORIGINS', '').split(',')
+allowed_origins.extend([origin.strip() for origin in env_origins if origin.strip()])
+
+# Configure CORS with credentials support - Allow all origins
+CORS(app, 
+     resources={r"/api/*": {"origins": "*"}},  # Allow all origins for API
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     expose_headers=["Content-Type", "Authorization"]
+)
+
+# ============================================
+# LOGGING CONFIGURATION
+# ============================================
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# ============================================
+# REGISTER BLUEPRINTS
+# ============================================
+
+app.register_blueprint(auth_bp, url_prefix='/api/auth')
+app.register_blueprint(symptom_bp, url_prefix='/api/symptoms')
+app.register_blueprint(hospital_bp, url_prefix='/api/hospitals')
+app.register_blueprint(appointment_bp, url_prefix='/api/appointments')
+app.register_blueprint(chat_bp, url_prefix='/api/chat')
+
+# ============================================
+# CREATE DATABASE TABLES
+# ============================================
+
+with app.app_context():
+    db.create_all()
+    logger.info("Database tables created successfully")
+
+# ============================================
+# HEALTH CHECK & INFO ROUTES
+# ============================================
+
+@app.route('/')
+def index():
+    """Root endpoint with API information"""
+    return jsonify({
+        'message': 'MediConnect AI Backend API',
+        'version': '1.0.0',
+        'status': 'running',
+        'description': 'AI-powered healthcare navigation platform for Microsoft Imagine Cup 2026',
+        'endpoints': {
+            'health': '/api/health',
+            'auth': '/api/auth/*',
+            'symptoms': '/api/analyze-symptoms',
+            'hospitals_search': '/api/hospitals/search',
+            'hospitals_emergency': '/api/hospitals/emergency',
+            'hospitals_details': '/api/hospitals/<hospital_id>',
+            'translate': '/api/translate'
+        },
+        'documentation': 'See README.md for complete API documentation'
+    }), 200
+
+
+@app.route('/api/health')
+def health_check():
+    """Health check endpoint for monitoring"""
+    try:
+        # Check database connection
+        db.session.execute('SELECT 1')
+        db_status = 'connected'
+    except Exception as e:
+        db_status = f'error: {str(e)}'
+    
+    return jsonify({
+        'status': 'healthy',
+        'database': db_status,
+        'symptom_analyzer': 'active' if symptom_analyzer.symptoms_data else 'no data',
+        'hospital_matcher': 'active' if hospital_matcher.hospitals else 'no data',
+        'timestamp': datetime.utcnow().isoformat()
+    }), 200
+
+
+# ============================================
+# ANALYTICS ROUTES (for Imagine Cup Demo!)
+# ============================================
+
+@app.route('/api/analytics/stats', methods=['GET'])
+def get_analytics_stats():
+    """Get comprehensive analytics statistics - for Imagine Cup presentation"""
+    try:
+        from utils.analytics import analytics
+        stats = analytics.get_stats()
+        
+        return jsonify({
+            'success': True,
+            'stats': stats
+        }), 200
+    except Exception as e:
+        logger.error(f"Error getting analytics: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/analytics/dashboard', methods=['GET'])
+def get_analytics_dashboard():
+    """Get simplified analytics for dashboard display"""
+    try:
+        from utils.analytics import analytics
+        stats = analytics.get_dashboard_stats()
+        
+        return jsonify({
+            'success': True,
+            'dashboard': stats
+        }), 200
+    except Exception as e:
+        logger.error(f"Error getting dashboard analytics: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+# ============================================
+# SYMPTOM ANALYSIS ROUTES
+# ============================================
+
+@app.route('/api/analyze-symptoms', methods=['POST'])
+def analyze_symptoms():
+    """
+    Analyze user symptoms and provide recommendations
+    
+    Request body:
+    {
+        "symptoms": "chest pain and difficulty breathing",
+        "language": "en" (optional, default: "en")
+    }
+    
+    Response:
+    {
+        "urgency": "HIGH",
+        "urgency_score": 9,
+        "matched_symptoms": ["Chest Pain", "Shortness of Breath"],
+        "specialties": ["Cardiology", "Emergency Medicine"],
+        "description": "...",
+        "first_aid": [...],
+        "red_flags": [...]
+    }
+    """
+    try:
+        data = request.get_json()
+        
+        # Validate input
+        if not data or not data.get('symptoms'):
+            return jsonify({
+                'error': 'Symptoms are required',
+                'message': 'Please provide symptoms description in the request body'
+            }), 400
+        
+        symptoms_text = data['symptoms'].strip()
+        language = data.get('language', 'en')
+        
+        # Validate language
+        if language not in ['en', 'kn', 'hi', 'ta']:
+            return jsonify({
+                'error': 'Invalid language',
+                'message': 'Supported languages: en, kn, hi, ta'
+            }), 400
+        
+        if len(symptoms_text) < 3:
+            return jsonify({
+                'error': 'Symptoms too short',
+                'message': 'Please provide more detailed symptoms (at least 3 characters)'
+            }), 400
+        
+        # Analyze symptoms
+        logger.info(f"Analyzing symptoms: {symptoms_text[:50]}... (language: {language})")
+        analysis_result = symptom_analyzer.analyze(symptoms_text, language)
+        
+        # Save to search history if user is logged in
+        try:
+            verify_jwt_in_request(optional=True)
+            user_id = get_jwt_identity()
+            
+            if user_id:
+                history_entry = SearchHistory(
+                    user_id=user_id,
+                    symptoms=symptoms_text,
+                    urgency_level=analysis_result['urgency'],
+                    specialties=','.join(analysis_result['specialties'])
+                )
+                db.session.add(history_entry)
+                db.session.commit()
+                logger.info(f"Saved search history for user {user_id}")
+        except Exception as e:
+            logger.warning(f"Could not save search history: {e}")
+            # Continue even if saving history fails
+        
+        return jsonify(analysis_result), 200
+        
+    except Exception as e:
+        logger.error(f"Error analyzing symptoms: {str(e)}", exc_info=True)
+        return jsonify({
+            'error': 'Analysis failed',
+            'message': 'An error occurred while analyzing symptoms. Please try again.'
+        }), 500
+
+
+# ============================================
+# HOSPITAL SEARCH ROUTES
+# ============================================
+
+@app.route('/api/hospitals/search', methods=['POST'])
+def search_hospitals():
+    """
+    Find hospitals based on symptoms analysis and location
+    
+    Request body:
+    {
+        "specialties": ["Cardiology", "Emergency Medicine"],
+        "location": {"lat": 12.9716, "lng": 77.5946},
+        "urgency": "HIGH" (optional, default: "MEDIUM"),
+        "filters": {
+            "type": "Private" (optional),
+            "emergency_only": true (optional),
+            "max_distance": 10 (optional),
+            "availability_24_7": true (optional)
+        }
+    }
+    
+    Response:
+    {
+        "success": true,
+        "urgency": "HIGH",
+        "total_results": 10,
+        "hospitals": [
+            {
+                "id": "apollo-bangalore",
+                "name": "Apollo Hospital",
+                "distance_km": 5.2,
+                "estimated_time_minutes": 18,
+                "match_score": 98.0,
+                "score_breakdown": {...},
+                ...
+            }
+        ]
+    }
+    """
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        if not data:
+            return jsonify({
+                'error': 'Request body is required',
+                'message': 'Please provide search parameters'
+            }), 400
+        
+        specialties = data.get('specialties', [])
+        user_location = data.get('location')
+        urgency = data.get('urgency', 'MEDIUM')
+        filters = data.get('filters', {})
+        
+        # Validate urgency level
+        if urgency not in ['HIGH', 'MEDIUM', 'LOW']:
+            return jsonify({
+                'error': 'Invalid urgency level',
+                'message': 'Urgency must be HIGH, MEDIUM, or LOW'
+            }), 400
+        
+        # Use Bangalore center as default if location not provided
+        if not user_location:
+            user_location = {'lat': 12.9716, 'lng': 77.5946}
+            logger.warning("No location provided, using Bangalore center as default")
+        
+        # Validate location format
+        if 'lat' not in user_location or 'lng' not in user_location:
+            return jsonify({
+                'error': 'Invalid location format',
+                'message': 'Location must include lat and lng coordinates'
+            }), 400
+        
+        # Find matching hospitals
+        logger.info(f"Searching hospitals: specialties={specialties}, urgency={urgency}, filters={filters}")
+        hospitals = hospital_matcher.find_hospitals(
+            specialties=specialties,
+            user_location=user_location,
+            urgency=urgency,
+            filters=filters
+        )
+        
+        return jsonify({
+            'success': True,
+            'urgency': urgency,
+            'total_results': len(hospitals),
+            'hospitals': hospitals
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error searching hospitals: {str(e)}", exc_info=True)
+        return jsonify({
+            'error': 'Search failed',
+            'message': 'An error occurred while searching hospitals. Please try again.'
+        }), 500
+
+
+@app.route('/api/hospitals/emergency', methods=['POST'])
+def find_emergency_hospitals():
+    """
+    Find nearest emergency hospitals
+    
+    Request body:
+    {
+        "location": {"lat": 12.9716, "lng": 77.5946},
+        "max_results": 5 (optional, default: 5)
+    }
+    
+    Response:
+    {
+        "success": true,
+        "total_results": 5,
+        "message": "Found 5 emergency hospitals nearby",
+        "hospitals": [
+            {
+                "id": "manipal-bangalore",
+                "name": "Manipal Hospital",
+                "distance_km": 3.2,
+                "estimated_time_minutes": 10,
+                "emergency_available": true,
+                ...
+            }
+        ]
+    }
+    """
+    try:
+        data = request.get_json()
+        
+        if not data or not data.get('location'):
+            return jsonify({
+                'error': 'Location is required',
+                'message': 'Please provide your location for emergency search'
+            }), 400
+        
+        user_location = data['location']
+        
+        # Validate location format
+        if 'lat' not in user_location or 'lng' not in user_location:
+            return jsonify({
+                'error': 'Invalid location format',
+                'message': 'Location must include lat and lng coordinates'
+            }), 400
+        
+        max_results = data.get('max_results', 5)
+        
+        # Validate max_results
+        if not isinstance(max_results, int) or max_results < 1 or max_results > 20:
+            return jsonify({
+                'error': 'Invalid max_results',
+                'message': 'max_results must be an integer between 1 and 20'
+            }), 400
+        
+        # Find emergency hospitals
+        logger.info(f"Finding emergency hospitals near {user_location}")
+        hospitals = hospital_matcher.find_emergency_hospitals(
+            user_location=user_location,
+            max_results=max_results
+        )
+        
+        if not hospitals:
+            return jsonify({
+                'success': True,
+                'total_results': 0,
+                'hospitals': [],
+                'message': 'No emergency hospitals found nearby. Please call 108 (India) or local emergency number for immediate assistance.'
+            }), 200
+        
+        return jsonify({
+            'success': True,
+            'total_results': len(hospitals),
+            'message': f'Found {len(hospitals)} emergency hospital{"s" if len(hospitals) != 1 else ""} nearby',
+            'hospitals': hospitals,
+            'emergency_numbers': {
+                'india': '108',
+                'ambulance': '102',
+                'police': '100'
+            }
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error finding emergency hospitals: {str(e)}", exc_info=True)
+        return jsonify({
+            'error': 'Emergency search failed',
+            'message': 'An error occurred while finding emergency hospitals. Please call 108 immediately.'
+        }), 500
+
+
+@app.route('/api/hospitals/<hospital_id>', methods=['GET'])
+def get_hospital_details(hospital_id):
+    """
+    Get detailed information about a specific hospital
+    
+    Response:
+    {
+        "success": true,
+        "hospital": {
+            "id": "apollo-bangalore",
+            "name": "Apollo Hospital",
+            ...
+        }
+    }
+    """
+    try:
+        hospital = hospital_matcher.get_hospital_by_id(hospital_id)
+        
+        if not hospital:
+            return jsonify({
+                'error': 'Hospital not found',
+                'message': f'No hospital found with ID: {hospital_id}'
+            }), 404
+        
+        return jsonify({
+            'success': True,
+            'hospital': hospital
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error getting hospital details: {str(e)}", exc_info=True)
+        return jsonify({
+            'error': 'Failed to retrieve hospital',
+            'message': 'An error occurred while fetching hospital details'
+        }), 500
+
+
+@app.route('/api/hospitals/specialty/<specialty>', methods=['GET'])
+def get_hospitals_by_specialty(specialty):
+    """
+    Get all hospitals offering a specific specialty
+    
+    Response:
+    {
+        "success": true,
+        "specialty": "Cardiology",
+        "total_results": 15,
+        "hospitals": [...]
+    }
+    """
+    try:
+        hospitals = hospital_matcher.get_hospitals_by_specialty(specialty)
+        
+        return jsonify({
+            'success': True,
+            'specialty': specialty,
+            'total_results': len(hospitals),
+            'hospitals': hospitals
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error getting hospitals by specialty: {str(e)}", exc_info=True)
+        return jsonify({
+            'error': 'Failed to retrieve hospitals',
+            'message': 'An error occurred while fetching hospitals'
+        }), 500
+
+
+@app.route('/api/hospitals/stats', methods=['GET'])
+def get_hospital_stats():
+    """
+    Get hospital database statistics
+    
+    Response:
+    {
+        "success": true,
+        "statistics": {
+            "total_hospitals": 40,
+            "emergency_available": 25,
+            "open_24_7": 18,
+            ...
+        }
+    }
+    """
+    try:
+        stats = hospital_matcher.get_hospital_statistics()
+        
+        return jsonify({
+            'success': True,
+            'statistics': stats
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error getting hospital statistics: {str(e)}", exc_info=True)
+        return jsonify({
+            'error': 'Failed to retrieve statistics',
+            'message': 'An error occurred while fetching hospital statistics'
+        }), 500
+
+
+# ============================================
+# TRANSLATION ROUTE (OPTIONAL)
+# ============================================
+
+@app.route('/api/translate', methods=['POST'])
+def translate_text():
+    """
+    Translate text between English and regional languages
+    
+    Request body:
+    {
+        "text": "chest pain",
+        "target_language": "kn" (kn/hi/ta)
+    }
+    
+    Response:
+    {
+        "success": true,
+        "original": "chest pain",
+        "translated": "ಎದೆ ನೋವು",
+        "source_language": "en",
+        "target_language": "kn"
+    }
+    """
+    try:
+        data = request.get_json()
+        
+        if not data or not data.get('text'):
+            return jsonify({
+                'error': 'Text is required',
+                'message': 'Please provide text to translate'
+            }), 400
+        
+        text = data['text']
+        target = data.get('target_language', 'kn')
+        
+        # Validate target language
+        if target not in ['kn', 'hi', 'ta', 'en']:
+            return jsonify({
+                'error': 'Invalid target language',
+                'message': 'Supported languages: en, kn, hi, ta'
+            }), 400
+        
+        # Dictionary-based translation for medical terms
+        # For production scale, integrate Google Translate API or Azure Translator
+        translations = {
+            'en_to_kn': {
+                'chest pain': 'ಎದೆ ನೋವು',
+                'headache': 'ತಲೆನೋವು',
+                'fever': 'ಜ್ವರ',
+                'stomach pain': 'ಹೊಟ್ಟೆ ನೋವು',
+                'cough': 'ಕೆಮ್ಮು',
+                'cold': 'ಶೀತ',
+                'emergency': 'ತುರ್ತು',
+                'hospital': 'ಆಸ್ಪತ್ರೆ',
+                'doctor': 'ವೈದ್ಯರು',
+                'medicine': 'ಔಷಧಿ',
+            },
+            'kn_to_en': {
+                'ಎದೆ ನೋವು': 'chest pain',
+                'ತಲೆನೋವು': 'headache',
+                'ಜ್ವರ': 'fever',
+                'ಹೊಟ್ಟೆ ನೋವು': 'stomach pain',
+                'ಕೆಮ್ಮು': 'cough',
+                'ಶೀತ': 'cold',
+                'ತುರ್ತು': 'emergency',
+                'ಆಸ್ಪತ್ರೆ': 'hospital',
+                'ವೈದ್ಯರು': 'doctor',
+                'ಔಷಧಿ': 'medicine',
+            },
+            'en_to_hi': {
+                'chest pain': 'सीने में दर्द',
+                'headache': 'सिरदर्द',
+                'fever': 'बुखार',
+                'stomach pain': 'पेट दर्द',
+                'cough': 'खांसी',
+                'cold': 'जुकाम',
+                'emergency': 'आपातकाल',
+                'hospital': 'अस्पताल',
+                'doctor': 'डॉक्टर',
+                'medicine': 'दवा',
+            },
+            'en_to_ta': {
+                'chest pain': 'மார்பு வலி',
+                'headache': 'தலைவலி',
+                'fever': 'காய்ச்சல்',
+                'stomach pain': 'வயிற்று வலி',
+                'cough': 'இருமல்',
+                'cold': 'சளி',
+                'emergency': 'அவசரம்',
+                'hospital': 'மருத்துவமனை',
+                'doctor': 'மருத்துவர்',
+                'medicine': 'மருந்து',
+            }
+        }
+        
+        # Determine source language (simple detection)
+        source = 'en'
+        if any(ord(c) > 127 for c in text):
+            # Contains non-ASCII characters (likely regional language)
+            if any(ord(c) in range(0x0C80, 0x0CFF) for c in text):
+                source = 'kn'
+            elif any(ord(c) in range(0x0900, 0x097F) for c in text):
+                source = 'hi'
+            elif any(ord(c) in range(0x0B80, 0x0BFF) for c in text):
+                source = 'ta'
+        
+        # Get translation
+        translation_dict = translations.get(f'{source}_to_{target}', {})
+        translated = translation_dict.get(text.lower(), text)  # Fallback to original if not found
+        
+        return jsonify({
+            'success': True,
+            'original': text,
+            'translated': translated,
+            'source_language': source,
+            'target_language': target
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error translating text: {str(e)}", exc_info=True)
+        return jsonify({
+            'error': 'Translation failed',
+            'message': 'An error occurred during translation'
+        }), 500
+
+
+# ============================================
+# COMBINED SEARCH ROUTE (Symptoms + Hospitals)
+# ============================================
+
+@app.route('/api/search', methods=['POST'])
+def combined_search():
+    """
+    Combined endpoint: Analyze symptoms and find hospitals in one call
+    
+    Request body:
+    {
+        "symptoms": "chest pain and difficulty breathing",
+        "language": "en",
+        "location": {"lat": 12.9716, "lng": 77.5946},
+        "filters": {...}
+    }
+    
+    Response:
+    {
+        "success": true,
+        "symptom_analysis": {...},
+        "hospitals": [...]
+    }
+    """
+    try:
+        data = request.get_json()
+        
+        if not data or not data.get('symptoms'):
+            return jsonify({
+                'error': 'Symptoms are required',
+                'message': 'Please provide symptoms for analysis'
+            }), 400
+        
+        symptoms_text = data['symptoms'].strip()
+        language = data.get('language', 'en')
+        user_location = data.get('location', {'lat': 12.9716, 'lng': 77.5946})
+        filters = data.get('filters', {})
+        
+        # Step 1: Analyze symptoms
+        analysis_result = symptom_analyzer.analyze(symptoms_text, language)
+        
+        # Step 2: Find hospitals based on analysis
+        specialties = analysis_result['specialties']
+        urgency = analysis_result['urgency']
+        
+        hospitals = hospital_matcher.find_hospitals(
+            specialties=specialties,
+            user_location=user_location,
+            urgency=urgency,
+            filters=filters
+        )
+        
+        # Save to search history if user is logged in
+        try:
+            verify_jwt_in_request(optional=True)
+            user_id = get_jwt_identity()
+            
+            if user_id:
+                history_entry = SearchHistory(
+                    user_id=user_id,
+                    symptoms=symptoms_text,
+                    urgency_level=urgency,
+                    specialties=','.join(specialties)
+                )
+                db.session.add(history_entry)
+                db.session.commit()
+        except:
+            pass
+        
+        return jsonify({
+            'success': True,
+            'symptom_analysis': analysis_result,
+            'hospitals': {
+                'total_results': len(hospitals),
+                'urgency': urgency,
+                'results': hospitals
+            }
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error in combined search: {str(e)}", exc_info=True)
+        return jsonify({
+            'error': 'Search failed',
+            'message': 'An error occurred during the search'
+        }), 500
+
+
+# ============================================
+# ERROR HANDLERS
+# ============================================
+
+@app.errorhandler(404)
+def not_found(error):
+    """Handle 404 errors"""
+    return jsonify({
+        'error': 'Endpoint not found',
+        'message': 'The requested endpoint does not exist',
+        'status': 404
+    }), 404
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    """Handle 500 errors"""
+    db.session.rollback()
+    logger.error(f"Internal server error: {error}", exc_info=True)
+    return jsonify({
+        'error': 'Internal server error',
+        'message': 'An unexpected error occurred. Please try again later.',
+        'status': 500
+    }), 500
+
+
+@app.errorhandler(400)
+def bad_request(error):
+    """Handle 400 errors"""
+    return jsonify({
+        'error': 'Bad request',
+        'message': 'The request was invalid or cannot be served',
+        'status': 400
+    }), 400
+
+
+@app.errorhandler(401)
+def unauthorized(error):
+    """Handle 401 errors"""
+    return jsonify({
+        'error': 'Unauthorized',
+        'message': 'Authentication is required to access this resource',
+        'status': 401
+    }), 401
+
+
+@app.errorhandler(403)
+def forbidden(error):
+    """Handle 403 errors"""
+    return jsonify({
+        'error': 'Forbidden',
+        'message': 'You do not have permission to access this resource',
+        'status': 403
+    }), 403
+
+
+@app.errorhandler(405)
+def method_not_allowed(error):
+    """Handle 405 errors"""
+    return jsonify({
+        'error': 'Method not allowed',
+        'message': 'The HTTP method is not allowed for this endpoint',
+        'status': 405
+    }), 405
+
+
+# ============================================
+# JWT ERROR HANDLERS
+# ============================================
+
+@jwt.expired_token_loader
+def expired_token_callback(jwt_header, jwt_payload):
+    """Handle expired JWT tokens"""
+    return jsonify({
+        'error': 'Token has expired',
+        'message': 'Your session has expired. Please login again.'
+    }), 401
+
+
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    """Handle invalid JWT tokens"""
+    return jsonify({
+        'error': 'Invalid token',
+        'message': 'The provided token is invalid. Please login again.'
+    }), 401
+
+
+@jwt.unauthorized_loader
+def missing_token_callback(error):
+    """Handle missing JWT tokens"""
+    return jsonify({
+        'error': 'Authorization required',
+        'message': 'Please provide a valid access token to access this resource.'
+    }), 401
+
+
+@jwt.revoked_token_loader
+def revoked_token_callback(jwt_header, jwt_payload):
+    """Handle revoked JWT tokens"""
+    return jsonify({
+        'error': 'Token has been revoked',
+        'message': 'This token is no longer valid. Please login again.'
+    }), 401
+
+
+# ============================================
+# BEFORE REQUEST HOOKS
+# ============================================
+
+@app.before_request
+def log_request():
+    """Log all incoming requests"""
+    logger.info(f"{request.method} {request.path} - {request.remote_addr}")
+
+
+@app.after_request
+def after_request(response):
+    """Add security headers to all responses"""
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    return response
+
+
+# ============================================
+# RUN APPLICATION
+# ============================================
+
+if __name__ == '__main__':
+    port = int(os.getenv('PORT', 5000))
+    debug = os.getenv('FLASK_ENV', 'development') == 'development'
+    
+    logger.info(f"Starting MediConnect AI Backend on port {port}")
+    logger.info(f"Debug mode: {debug}")
+    logger.info(f"Database: {app.config['SQLALCHEMY_DATABASE_URI']}")
+    logger.info(f"CORS origins: http://localhost:3000, http://localhost:3001")
+    
+    app.run(
+        host='0.0.0.0',
+        port=port,
+        debug=debug
+    )

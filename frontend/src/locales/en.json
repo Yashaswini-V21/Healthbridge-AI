@@ -1,0 +1,184 @@
+{
+  "common": {
+    "appName": "MediConnect AI",
+    "tagline": "Your Healthcare Navigation Partner",
+    "language": "Language",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "or": "or",
+    "and": "and"
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "symptoms": "Symptom Checker",
+    "hospitals": "Hospitals",
+    "emergency": "Emergency",
+    "favorites": "Favorites",
+    "history": "History",
+    "profile": "Profile",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout"
+  },
+  "landing": {
+    "hero": {
+      "title": "Healthcare Reimagined",
+      "subtitle": "Find the right hospital for your symptoms instantly with AI-powered recommendations",
+      "cta": "Get Started",
+      "secondary": "Learn More"
+    },
+    "stats": {
+      "hospitals": "Hospitals",
+      "symptoms": "Symptoms Tracked",
+      "languages": "Languages",
+      "users": "Happy Users"
+    },
+    "features": {
+      "title": "Smart Features",
+      "subtitle": "Everything you need for healthcare navigation",
+      "ai": {
+        "title": "AI Symptom Analysis",
+        "desc": "Advanced algorithms to understand your symptoms"
+      },
+      "match": {
+        "title": "Smart Hospital Matching",
+        "desc": "Find the best hospital based on specialty and distance"
+      },
+      "emergency": {
+        "title": "Emergency Mode",
+        "desc": "Quick access to nearest emergency facilities 24/7"
+      },
+      "voice": {
+        "title": "Voice Input",
+        "desc": "Speak your symptoms in English or Kannada"
+      },
+      "bilingual": {
+        "title": "Bilingual Support",
+        "desc": "Complete interface in English and Kannada"
+      },
+      "directions": {
+        "title": "Live Directions",
+        "desc": "Real-time navigation to hospitals via Google Maps"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Login to access your health dashboard",
+      "email": "Email Address",
+      "password": "Password",
+      "remember": "Remember me",
+      "forgot": "Forgot Password?",
+      "submit": "Login",
+      "noAccount": "Don't have an account?",
+      "signup": "Sign up now"
+    },
+    "signup": {
+      "title": "Create Account",
+      "subtitle": "Join MediConnect AI today",
+      "name": "Full Name",
+      "email": "Email Address",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "phone": "Phone Number",
+      "age": "Age",
+      "gender": "Gender",
+      "submit": "Create Account",
+      "hasAccount": "Already have an account?",
+      "login": "Login here"
+    }
+  },
+  "symptomChecker": {
+    "title": "Symptom Checker",
+    "subtitle": "Tell us what you're experiencing",
+    "placeholder": "Describe your symptoms...",
+    "voiceInput": "Voice Input",
+    "quickSelect": "Quick Select Common Symptoms",
+    "analyze": "Analyze Symptoms",
+    "analyzing": "Analyzing your symptoms...",
+    "urgency": {
+      "title": "Urgency Level",
+      "high": "HIGH - Seek immediate medical attention",
+      "medium": "MEDIUM - Consult a doctor soon",
+      "low": "LOW - Monitor and consult if persists"
+    },
+    "recommended": "Recommended Specialties",
+    "matchedHospitals": "Matched Hospitals"
+  },
+  "symptoms": {
+    "fever": "Fever",
+    "cough": "Cough",
+    "headache": "Headache",
+    "bodyPain": "Body Pain",
+    "chestPain": "Chest Pain",
+    "breathingDifficulty": "Breathing Difficulty",
+    "stomachPain": "Stomach Pain",
+    "nausea": "Nausea",
+    "dizziness": "Dizziness",
+    "fatigue": "Fatigue",
+    "soreThroat": "Sore Throat",
+    "runnyNose": "Runny Nose"
+  },
+  "emergency": {
+    "title": "EMERGENCY MODE",
+    "subtitle": "Immediate medical attention required",
+    "call": "Call emergency services immediately if:",
+    "reasons": [
+      "Severe chest pain or difficulty breathing",
+      "Unconsciousness or unresponsiveness",
+      "Severe bleeding or major trauma",
+      "Signs of stroke (FAST: Face, Arms, Speech, Time)",
+      "Suspected heart attack symptoms"
+    ],
+    "hotlines": "Emergency Hotlines - Call Now",
+    "nearest": "Nearest 24/7 Emergency Hospitals",
+    "callNow": "Call Now",
+    "navigate": "Navigate",
+    "closest": "CLOSEST",
+    "open247": "24/7",
+    "exit": "Exit Emergency Mode"
+  },
+  "hospital": {
+    "distance": "away",
+    "beds": "beds",
+    "rating": "Rating",
+    "specialties": "Specialties",
+    "facilities": "Facilities",
+    "openNow": "Open Now",
+    "closed": "Closed",
+    "emergency": "24/7 Emergency",
+    "call": "Call",
+    "directions": "Directions",
+    "favorite": "Add to Favorites",
+    "unfavorite": "Remove from Favorites"
+  },
+  "voice": {
+    "listening": "Listening...",
+    "speak": "Speak now",
+    "stopped": "Voice input stopped",
+    "error": "Voice recognition error",
+    "notSupported": "Voice input not supported in this browser",
+    "permissionDenied": "Microphone permission denied"
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "quickActions": "Quick Actions",
+    "recentSearches": "Recent Searches",
+    "favorites": "Your Favorites",
+    "noSearches": "No recent searches",
+    "noFavorites": "No favorite hospitals yet"
+  }
+}

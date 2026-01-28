@@ -1,0 +1,63 @@
+{
+  "name": "healthbridge-ai",
+  "version": "1.0.0",
+  "description": "AI-powered healthcare navigation platform - IBM SkillBuild & Edunet Foundation AIML Internship Capstone Project",
+  "author": "Yashaswini V",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Yashaswini-V21/healthbridge-ai.git"
+  },
+  "keywords": [
+    "healthcare",
+    "ai",
+    "machine-learning",
+    "symptom-checker",
+    "hospital-finder",
+    "azure-ai",
+    "react",
+    "ibm-skillbuild",
+    "edunet-foundation",
+    "internship-project",
+    "aiml"
+  ],
+  "private": true,
+  "dependencies": {
+    "@react-google-maps/api": "^2.19.2",
+    "@supabase/supabase-js": "^2.89.0",
+    "axios": "^1.6.2",
+    "framer-motion": "^10.16.16",
+    "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.300.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.49.2",
+    "react-hot-toast": "^2.4.1",
+    "react-router-dom": "^6.20.0",
+    "recharts": "^3.6.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.16",
+    "cross-env": "^10.1.0",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "postcss": "^8.4.32",
+    "react-scripts": "5.0.1",
+    "tailwindcss": "^3.4.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "cross-env CI=false react-scripts build"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
