@@ -1,8 +1,8 @@
-# 🏥 HealthBridge AI
+# 🏥 MediConnect
 
 <div align="center">
 
-![HealthBridge AI Banner](https://img.shields.io/badge/HealthBridge-AI_Healthcare-blueviolet?style=for-the-badge&logo=heart&logoColor=white)
+![MediConnect Banner](https://img.shields.io/badge/MediConnect-AI_Healthcare-blueviolet?style=for-the-badge&logo=heart&logoColor=white)
 
 ### *AI-Powered Healthcare Navigation Platform*
 ### **IBM SkillBuild & Edunet Foundation - AIML Internship Capstone Project**
@@ -50,7 +50,7 @@
 
 ## 🌟 Overview
 
-HealthBridge AI is an intelligent healthcare navigation platform developed as a **capstone project** for the **IBM SkillBuild AIML Internship** in collaboration with **Edunet Foundation**. This AI/ML project demonstrates the practical application of artificial intelligence and machine learning in healthcare, using **Azure OpenAI GPT-4o-mini** and **Azure Translator** to provide AI-powered symptom analysis and multilingual healthcare navigation.
+MediConnect is an intelligent healthcare navigation platform developed as a **capstone project** for the **IBM SkillBuild AIML Internship** in collaboration with **Edunet Foundation**. This AI/ML project demonstrates the practical application of artificial intelligence and machine learning in healthcare, using **Azure OpenAI GPT-4o-mini** and **Azure Translator** to provide AI-powered symptom analysis and multilingual healthcare navigation.
 
 ### Problem & Solution
 
@@ -66,7 +66,7 @@ HealthBridge AI is an intelligent healthcare navigation platform developed as a 
 
 ## 🤖 Azure AI Integration - Core AIML Learning
 
-HealthBridge AI demonstrates advanced AI/ML implementation using **Microsoft Azure AI services**, showcasing practical skills learned during the IBM SkillBuild internship:
+MediConnect demonstrates advanced AI/ML implementation using **Microsoft Azure AI services**, showcasing practical skills learned during the IBM SkillBuild internship:
 
 ### Azure OpenAI Service (GPT-4o-mini)
 - **Symptom Analysis**: Natural language understanding with medical context
@@ -237,7 +237,7 @@ AZURE_TRANSLATOR_LOCATION=global
 JWT_SECRET_KEY=your_secret_key_here
 FLASK_SECRET_KEY=your_flask_secret
 FLASK_ENV=production
-DATABASE_URL=sqlite:///mediconnect.db
+DATABASE_URL=sqlite:///healthbridge.db
 ```
 
 **Note:** Azure AI credentials are required for AI-powered symptom analysis and translation features.
@@ -277,7 +277,7 @@ DATABASE_URL=sqlite:///mediconnect.db
 ## 📂 Project Structure
 
 ```
-mediconnect-ai/
+healthbridge-ai/
 ├── backend/
 │   ├── app.py                     # Flask app entry
 │   ├── data/
@@ -403,7 +403,7 @@ Authorization: Bearer <token>
 - **Database**: SQLite with 46 hospitals + 55 symptoms
 - **AI Services**: Azure OpenAI GPT-4.1-mini + Azure Translator
 
-**Backend API Endpoint:** `https://mediconnect-api-rk8o.onrender.com`
+**Backend API Endpoint:** `https://healthbridge-api-rk8o.onrender.com`
 
 ### Quick Deployment Guide
 
@@ -416,7 +416,7 @@ npm run build
 ```
 
 **Backend (Render)**
-- Already deployed at: https://mediconnect-api-rk8o.onrender.com
+- Already deployed at: https://healthbridge-api-rk8o.onrender.com
 - Auto-deploys from GitHub main branch
 - Azure AI environment variables configured
 
@@ -453,7 +453,7 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 <div align="center">
 
-**HealthBridge AI** - *AI-Powered Healthcare Navigation*
+**MediConnect** - *AI-Powered Healthcare Navigation*
 
 IBM SkillBuild & Edunet Foundation - AIML Internship Capstone Project
 
